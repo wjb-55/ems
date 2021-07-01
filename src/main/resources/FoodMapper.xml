@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.baizhi.mysqlredis.dao.WjbDAO">
+   <select id="queryAll" resultType="food">
+        select * from food
+   </select>
+    <insert id="add" parameterType="food">
+        insert into food values(#{id},#{foodName},#{foodSrc},#{foodDate},#{person},#{fileFood},#{foodImporter})
+    </insert>
+    <delete id="delete" parameterType="Integer">
+        delete from food where id=#{id}
+    </delete>
+    <select id="selectById" resultType="food">
+        select * from food where id=#{id}
+    </select>
+       <update id="update">
+          update food
+          <set>
+             <if test="foodName!=null">foodName=#{foodName},</if>
+             <if test="foodSrc!=null">foodSrc=#{foodSrc},</if>
+             <if test="foodDate!=null">foodDate=#{foodDate},</if>
+             <if test="person!=null">person=#{person},</if>
+             <if test="fileFood!=null">fileFood=#{fileFood},</if>
+             <if test="foodImporter!=null">foodImporter=#{foodImporter},</if>
+          </set>
+          where id=#{id}
+       </update>
+
+    <!--   <select id="queryAll" resultType="wjbDept">-->
+<!--      select id,name from ems_dept-->
+<!--   </select>-->
+<!--   <resultMap id="aaMap" type="WjbEmp">-->
+<!--      <id column="id" property="id"/>-->
+<!--      <result column="ename" property="name"/>-->
+<!--      <result column="salary" property="salary"/>-->
+<!--      <result column="eage" property="age"/>-->
+<!--      <result column="deptw" property="dept"/>-->
+
+<!--      <association property="depts" javaType="wjbDept">-->
+<!--         <id column="did" property="id"/>-->
+<!--         <result column="dname" property="name"/>-->
+<!--      </association>-->
+<!--   </resultMap>-->
+
+<!--   <select id="queryByPage" resultMap="aaMap">-->
+<!--      select-->
+<!--         e.id,e.name ename,e.salary,e.age eage,e.dept deptw,-->
+<!--         d.id did,d.name dname-->
+<!--      from ems_emp e left join ems_dept d on e.dept=d.name-->
+<!--         limit #{page},#{rows}-->
+<!--   </select>-->
+<!--   <select id="countAll" resultType="Integer">-->
+<!--      select count(id) from ems_emp-->
+<!--   </select>-->
+
+<!--   <update id="update">-->
+<!--      update ems_emp-->
+<!--      <set>-->
+<!--         <if test="name!=null">name=#{name},</if>-->
+<!--         <if test="age!=null">age=#{age},</if>-->
+<!--         <if test="salary!=null">salary=#{salary},</if>-->
+<!--         <if test="dept!=null">dept=#{dept},</if>-->
+<!--      </set>-->
+<!--      where id=#{id}-->
+<!--   </update>-->
+
+</mapper>

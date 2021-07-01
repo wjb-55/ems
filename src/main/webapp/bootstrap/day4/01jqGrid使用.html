@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <!--引入Bootstrap核心css-->
+        <link rel="stylesheet" href="../css/bootstrap.min.css">
+
+        <!--引入jqGrid与Bootstrap集成核心css-->
+        <link rel="stylesheet" href="../grid/ui.jqgrid-bootstrap.css">
+
+        <!--引入jquery核心js-->
+        <script src="../js/jquery-3.5.1.min.js"></script>
+
+        <!--引入Bootstrap核心js-->
+        <script src="../js/bootstrap.js"></script>
+
+        <!--引入jqGrid国际化的js-->
+        <script src="../grid/grid.locale-cn.js"></script>
+
+        <!--引入jqGrid核心js-->
+        <script src="../grid/jquery.jqGrid.js"></script>
+        <script>
+            $(function (){
+
+                //初始化jqGrid表格
+                $("#userTable").jqGrid({
+                    url:"user.json",  //url
+                    mtype:"get",
+                    datatype:"json",  //指定返回数据的类型
+                    colNames:["id","名字","状态","年龄","生日"],  //表格的列名
+                    colModel:[  //表格列的参数
+                        /**
+                        * name:用来获取json中指定字段作为该列的数据展示
+                        * editable:true:设置是否可以编辑   false不能编辑  默认是false
+                         * classes:"text text-info" //给列设置样式
+                         * align:"center":列中内容的对齐方式  left right center  默认是left
+                         * edittype:  可以编辑的类型。可选值：text, textarea, select, checkbox, password, button, image and file.
+                         * editoptions:用来指定编辑类型为select时,select标签的数据获取方式
+                         *          1.固定写死{value:"1:北京;2:天津;3:海南"}
+                         *          2.后台查询{dataUrl:"数据地址"}  //加载远程数据 要求返回的结果必须是准备好select的html
+                         *          <select>
+                         *              <option>北京<option>
+                         *              <option>天津<option>
+                         *          <select>
+                         *
+                         * width:指定列宽
+                         * fixed:列宽度是否要固定不可变
+                         * formatter:对表格二次渲染  对应的值是一个function  function (单元格的值, 操作, 行对象)
+                         * hidden:true|false 指定在初始化时不显示哪个列
+                         * */
+                        {name:"id",editable:true,classes:"text text-info",hidden:true},
+                        {name:"name",editable:true,align:"center",width:"300px",fixed:true,
+                            formatter:function (cellvalue){
+                                    //状态:0 冻结   button  解除冻结  红色
+                                return "<img src='../img/"+cellvalue+"' height='200px' width='200px'>";
+                            }
+                        },
+                        {name:"status",editable:true,align:"center",width:"100px",fixed:true,
+                            formatter:function (cellvalue, options, rowObject){
+                                //console.log(rowObject.status);
+                                if(rowObject.status==0){
+                                    //状态:0 冻结   button  解除冻结  红色
+
+                                    return "<button class='btn btn-danger' onclick='updateStatus(\""+rowObject.id+"\",\""+cellvalue+"\")'>解除冻结</button>";
+                                }else{
+                                    //状态1  正常    button  冻结   绿色
+                                    return "<button class='btn btn-success' onclick='updateStatus(\""+rowObject.id+"\",\""+cellvalue+"\")'>冻结</button>";
+                                }
+                            }
+                        },
+                        {name:"age",editable:true,edittype:"select",editoptions:{value:"1:北京;2:天津;3:海南"}},
+                        {name:"birthday",editable:true}
+                    ],
+                    styleUI:"Bootstrap",  //是定时用样式
+                    pager:"#userPage", //指定创建分页工具栏的div的id
+                    autowidth:true,    //宽度自适应
+                    height:"auto",     //高度自适应
+                    rowNum:10,         //设置每页展示几条数据   默认每页展示20
+                    rowList:[3,5,10,15],  //设置每页展示几条数据的可选下拉框
+                    viewrecords:true,     //是否展示总记录数
+                    sortname:"birthday",  //指定排序的属性
+                    caption:"用户数据表格", //指定标题
+                    //cellEdit:true,        //用来开启单元格的点击修改操作  配置editable:true使用  默认false
+                    cellurl:"user/update",  //开启单元格可修改,修改后发送的url
+                    hiddengrid:false,     //控制表格是否打开   true:关闭  false:打开的
+                    hidegrid:false,       //启用或者禁用控制表格显示、隐藏的按钮  false:禁用 true 启用
+                    //multiselect:true,     //是否显示复选框
+                    page:1 ,//用来指定初始化的页码
+                    rownumbers: true,     //用来显示指定行的行号
+                    toolbar:['true','both'],  //定义工具栏的位置  数组中有两个值，第一个为是否启用，第二个指定工具栏位置
+                    gridComplete: function(){  //在页面加载完成之后触发的事件
+                        //顶部div t_userTable
+                        //底部div tb_userTable
+                        //alert("页面加载完成");
+                        //在顶部的div中放两个按钮
+                        $("#t_userTable").html("<button class='btn btn-warning' onclick='adds()'>添加</button>&emsp;&emsp;<button class='btn btn-info'>修改</button>");
+                        $("#tb_userTable").html("<button class='btn btn-warning'>添加</button>&emsp;&emsp;<button class='btn btn-info'>修改</button>");
+                    },
+                    onSelectRow: function(rowid,status){  //当选择行时触发此事件。rowid：当前行id；status：选择状态
+                        /*console.log(rowid);
+                        console.log(status);*/
+
+                        //方法的调用
+                        //$("表格的id").jqGrid('方法名',"参数列表....");
+
+                        /*
+                        * getRowData(方法名):获取指定行的id  参数:行id(rowId)
+                        *
+                        * */
+                        /*var rows=$("#userTable").jqGrid("getRowData",rowid);
+                        console.log(rows);*/
+                    }
+                });
+            });
+
+            function adds(){
+                alert();
+            }
+
+            function updateStatus(id,status){
+                alert(id);
+                alert(status);
+                // id  状态
+                //ajax
+            }
+        </script>
+
+        <title>jqGrid使用</title>
+    </head>
+    <body>
+
+    <br><br><br>
+        <button class="btn btn-success" id="aaa">测试按钮</button>
+        <script>
+            $("#aaa").click(function(){
+
+                /*
+                * getGridParam:返回请求的参数信息
+                *  参数:selrow:只读属性，最后选择行的id
+                * */
+                var rowId=$("#userTable").jqGrid("getGridParam","selrow");
+                alert(rowId);
+
+                //根据行id获取对应行的数据
+                var rows=$("#userTable").jqGrid("getRowData",rowId);
+                console.log(rows);
+            });
+        </script>
+
+        <!--创建一个表格-->
+        <table id="userTable" />
+
+        <!--创建分页工具栏-->
+        <div id="userPage" />
+
+    </body>
+</html>
